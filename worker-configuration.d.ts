@@ -20,4 +20,5 @@ interface Env {
   MISTRAL_API_KEY: string;
   XAI_API_KEY: string;
   PERPLEXITY_API_KEY: string;
+  AWS_BEDROCK_CONFIG: string;
 }
