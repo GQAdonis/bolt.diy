@@ -142,68 +142,36 @@ export const ChatImpl = memo(
 
     const [apiKeys, setApiKeys] = useState<Record<string, string>>({});
 
-    const { messages, isLoading, input, handleInputChange, setInput, stop, append, setMessages, reload } = useChat({
-      api: '/api/chat',
-      body: {
-        apiKeys,
-        files,
-        promptId,
-        contextOptimization: contextOptimizationEnabled,
-      },
-      sendExtraMessageFields: true,
-      headers: {
-        Accept: 'text/event-stream',
-      },
-      onError: async (error: Error & { response?: Response }) => {
-        logger.error('Request failed\n\n', error);
+    const { messages, isLoading, input, handleInputChange, setInput, stop, append, setMessages, reload, error } =
+      useChat({
+        api: '/api/chat',
+        body: {
+          apiKeys,
+          files,
+          promptId,
+          contextOptimization: contextOptimizationEnabled,
+        },
+        sendExtraMessageFields: true,
+        onError: (e) => {
+          logger.error('Request failed\n\n', e, error);
+          toast.error(
+            'There was an error processing your request: ' + (e.message ? e.message : 'No details were returned'),
+          );
+        },
+        onFinish: (message, response) => {
+          const usage = response.usage;
 
-        let errorMessage = 'An unknown error occurred';
+          if (usage) {
+            console.log('Token usage:', usage);
 
-        try {
-          if (error.response) {
-            const response = (await error.response.json()) as {
-              error?: string;
-              details?: string;
-              provider?: string;
-              model?: string;
-            };
-
-            if (response?.error) {
-              errorMessage = response.error;
-
-              if (response.details) {
-                logger.error('Error details:', response.details);
-              }
-
-              if (response.provider) {
-                logger.error('Provider:', response.provider);
-              }
-
-              if (response.model) {
-                logger.error('Model:', response.model);
-              }
-            }
+            // You can now use the usage data as needed
           }
-        } catch (e) {
-          logger.error('Error parsing error response:', e);
-          errorMessage = error.message || 'An unknown error occurred';
-        }
 
-        toast.error(errorMessage);
-        stop();
-      },
-      onFinish: (message, response) => {
-        const usage = response.usage;
-
-        if (usage) {
-          console.log('Token usage:', usage);
-        }
-
-        logger.debug('Finished streaming');
-      },
-      initialMessages,
-      initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
-    });
+          logger.debug('Finished streaming');
+        },
+        initialMessages,
+        initialInput: Cookies.get(PROMPT_COOKIE_KEY) || '',
+      });
     useEffect(() => {
       const prompt = searchParams.get('prompt');
 
@@ -300,6 +268,10 @@ export const ChatImpl = memo(
        * before they send another message.
        */
       await workbenchStore.saveAllFiles();
+
+      if (error != null) {
+        setMessages(messages.slice(0, -1));
+      }
 
       const fileModifications = workbenchStore.getFileModifcations();
 
