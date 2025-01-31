@@ -13,10 +13,32 @@ export default class DeepseekProvider extends BaseProvider {
   };
 
   staticModels: ModelInfo[] = [
-    { name: 'deepseek-coder', label: 'Deepseek-Coder', provider: 'Deepseek', maxTokenAllowed: 8000 },
-    { name: 'deepseek-chat', label: 'Deepseek-Chat', provider: 'Deepseek', maxTokenAllowed: 8000 },
-    { name: 'deepseek-r1', label: 'Deepseek R1', provider: 'Deepseek', maxTokenAllowed: 128000 },
-    { name: 'deepseek-reasoner', label: 'Deepseek R1-Zero', provider: 'Deepseek', maxTokenAllowed: 128000 },
+    {
+      name: 'deepseek-coder',
+      label: 'Deepseek-Coder',
+      provider: 'Deepseek',
+      maxTokenAllowed: 8000,
+    },
+    {
+      name: 'deepseek-chat',
+      label: 'Deepseek-Chat',
+      provider: 'Deepseek',
+      maxTokenAllowed: 8000,
+    },
+    {
+      name: 'deepseek-r1',
+      label: 'Deepseek R1',
+      provider: 'Deepseek',
+      maxTokenAllowed: 8000,
+      supportsVision: true,
+    },
+    {
+      name: 'deepseek-reasoner',
+      label: 'Deepseek R1-Zero',
+      provider: 'Deepseek',
+      maxTokenAllowed: 8000,
+      supportsVision: true,
+    },
   ];
 
   getModelInstance(options: {
@@ -40,7 +62,7 @@ export default class DeepseekProvider extends BaseProvider {
     }
 
     const openai = createOpenAI({
-      baseURL: 'https://api.deepseek.com',
+      baseURL: 'https://api.deepseek.com/beta',
       apiKey,
     });
 
